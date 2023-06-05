@@ -52,7 +52,7 @@ class ClientDetailView(RetrieveUpdateDestroyAPIView):
             prospects = CustomClient.objects.filter(is_prospect=True)
             return prospects | clients
         if self.request.user.usergroup == CustomUser.UserGroupe.SUPPORT:
-            return get_support_related_clients(self.request.user)#Client.objects.filter(contract__event__support_contact=self.request.user)
+            return get_support_related_clients(self.request.user)
             # The following is for Managers to still Access All clients, permissions will prevent access to
             # Unauthorized Usergroups
         return CustomClient.objects.filter(client_id=self.kwargs.get('client_id'))
