@@ -87,7 +87,7 @@ class UserAdmin(BaseUserAdmin):
                     "date_of_birth",
                     "password1",
                     "password2",
-                ),  # ICI QUE LA MAGIE OPERE
+                ), 
             },
         ),
         ("Role assignment", {"fields": ("usergroup",)}),

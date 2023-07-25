@@ -10,8 +10,8 @@ from rest_framework import viewsets, status
 
 def get_support_related_contracts(user):
     support_contracts = []
-    for event in Event.objects.filter(support_contact = user):
-        if event.support_contact == user and event.contract:
+    for event in Event.objects.filter(support_contact=user):
+        if event.support_contract == user and event.contract:
             support_contracts.append(event.contract.id)
     return Contract.objects.filter(id_in=support_contracts)
 
@@ -20,10 +20,12 @@ class ContractView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsManager, ContractPermissions]
     
     def get_queryset(self):
-        if self.request.user.usergroup == CustomUser.UserGroupe.SUPPORT:
+        if self.request.user == CustomUser.UserGroupe.SUPPORT:
             return get_support_related_contracts(self.request.user)
-        elif self.request.user.usergroup == CustomUser.UserGroupe.SALE:
-            return Contract.objects.filter(client_sales_contact=self.request.user)
+        elif self.request.user == CustomUser.UserGroupe.SALE:
+            return Contract.objects.filter(sales_contact=self.request.user)
+        else:
+            return Contract.objects.all()
     
     def create(self, request):
         serializer = ContractSerializer(context={'request': request}, data=request.data)
@@ -31,6 +33,21 @@ class ContractView(viewsets.ModelViewSet):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def perform_create(self, serializer):
+        return serializer.save(sales_contact=self.request.user)
+    
+class ContractDetailView(RetrieveUpdateDestroyAPIView):
+    serializer_class = ContractSerializer
+    permission_classes = [IsAuthenticated, IsManager, ContractPermissions]
+    lookup_field = 'id'
+    
+    def get_queryset(self, *args, **kwargs):
+        if self.request.user == CustomUser.UserGroupe.SALE:
+            return Contract.objects.filter(sales_contact=self.request.user)
+        elif self.request.user == CustomUser.UserGroupe.SALE:
+            return Contract.objects.filter(support_contact=self.request.user)
+        return Contract.objects.filter(id=self.kwargs.get('id'))
     
 class EventView(ListCreateAPIView):
     serializer_class = EventSerializer

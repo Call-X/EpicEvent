@@ -9,17 +9,18 @@ from core.models import CustomUser
 class Contract(models.Model):
     client = models.ForeignKey(
         to=CustomClient,
-        blank=False,
+        blank=True,
+        null=True,
         on_delete=models.CASCADE,
         limit_choices_to={"is_prospect":False}
     )
 
     sales_contact = models.ForeignKey(
         to=CustomUser,
-        null=True,
         blank=True,
+        null=True,
         on_delete=models.SET_NULL,
-        limit_choices_to={"usergroup": "Sale"},
+        limit_choices_to={"usergroup": "Sale"}
     )
 
     date_created = models.DateTimeField(auto_now_add=True)
@@ -29,7 +30,7 @@ class Contract(models.Model):
 
     STATUS = (("OPEN", "Open"), ("SIGNED", "Contract Signed"), ("ENDED", "Ended"))
 
-    status = models.CharField(
+    event_status = models.CharField(
         max_length=32,
         choices=STATUS,
         default="OPEN",
@@ -45,10 +46,10 @@ class Event(models.Model):
     contract = models.OneToOneField(
         to=Contract,
         on_delete=models.CASCADE,
+        null=True, blank=True,
         limit_choices_to={"status": "OPEN"},
-        related_name="contract",
-        null=True,
-        blank=True,
+        related_name="event",
+
     )
     name = models.CharField(max_length=100)
     location = models.CharField(max_length=100)

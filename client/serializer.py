@@ -15,10 +15,10 @@ class CustomClientSerializer(serializers.ModelSerializer):
             "is_prospect"
         ]
         
-    read_only_fields = ("id")
+    read_only_fields = ("id",)
     sales_contact = serializers.SerializerMethodField("get_sales_contact_email")
     
     def get_sales_contact_email(self, obj):
-        if obj.sales.contact is None:
+        if obj.sales_contact is None:
             return "Not attributed yet"
         return obj.sales_contact.email

@@ -5,7 +5,6 @@ from contracts.models import Contract
 from EpicEvent.permissions import ClientPermissions, IsManager
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from contracts.views import get_support_related_contracts
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import viewsets, status
 
@@ -19,8 +18,8 @@ def get_support_related_clients(user):
 
 class ClientView(viewsets.ModelViewSet):
     serializer_class = CustomClientSerializer
-    queryset = Contract.objects.all()
-    permission_classes = [IsAuthenticated, IsManager, ClientPermissions]
+    queryset = CustomClient.objects.all()
+    permission_classes = [IsManager, ClientPermissions]
     
     def create(self, request):
         serializer = CustomClientSerializer(context={'request': request}, data=request.data)
@@ -31,15 +30,15 @@ class ClientView(viewsets.ModelViewSet):
     
 class ClientListView(ListCreateAPIView):
     serializer_class = CustomClientSerializer
-    permission_classes = [IsAuthenticated, IsManager, ClientPermissions]
+    permission_classes = [IsManager, ClientPermissions]
 
     def get_queryset(self, *args, **kwargs):  
-        return CustomClient.objects.filter(client_id=self.kwargs.get('client_id'))
+        return CustomClient.objects.filter(id=self.kwargs.get('id'))
 
 
 class ClientDetailView(RetrieveUpdateDestroyAPIView):
     serializer_class = CustomClientSerializer
-    permission_classes = [IsAuthenticated, IsManager, ClientPermissions]
+    permission_classes = [IsManager, ClientPermissions]
     lookup_field = 'id'
     
     def get_queryset(self):
@@ -55,7 +54,7 @@ class ClientDetailView(RetrieveUpdateDestroyAPIView):
             return get_support_related_clients(self.request.user)
             # The following is for Managers to still Access All clients, permissions will prevent access to
             # Unauthorized Usergroups
-        return CustomClient.objects.filter(client_id=self.kwargs.get('client_id'))
+        return CustomClient.objects.filter(id=self.kwargs.get('id'))
 
     
     

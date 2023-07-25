@@ -11,7 +11,7 @@ class ContractSerializer(serializers.ModelSerializer):
             "id",
             "client",
             "client_name",
-            "status",
+            "event_status",
             "sales_contact",
             "date_created",
             "date_updated",
@@ -19,6 +19,20 @@ class ContractSerializer(serializers.ModelSerializer):
             "payment_due",
         ]
         read_only_fields = ["id", "client", "client_name", "date_created"]
+        
+        def is_valid(self, data):
+            if not CustomUser.objects.filter(
+                    user=data['email'], contact=data['sales_contact']).exists():
+                error_message = 'The sale_contact '\
+                                + str(data['sales_contact'])\
+                                + ' is not registered for the project.'
+                raise serializers.ValidationError(error_message)
+            return super().is_valid(data)
+        
+        def get_sales_contact_mail(self, obj):
+            if obj.sales_contact is None:
+                return "Not attributed yet"
+            return obj.sales_contact.email
 
     sales_contact = serializers.SerializerMethodField("get_sales_contact_mail")
     client_name = serializers.SerializerMethodField("get_client_name")
@@ -31,19 +45,10 @@ class ContractSerializer(serializers.ModelSerializer):
     def get_sales_contact_mail(self, obj):
         if obj.sales_contact is None:
             return "Not attributed yet"
-        return obj.sales_contact.email
+        return (obj.sales_contact.email).is_valid()
     
 class EventSerializer(serializers.ModelSerializer):
     class Meta:
-        event_id = serializers.ReadOnlyField(source='id')
-        queryset=CustomUser.objects.all()
         model = Event
         fields = "__all__"
-        read_only__fields = [
-            "date_created",
-            "date_updated",
-            "support_contact",
-            "event_status",
-            "id",
-            "contract"
-        ]
+        read_only_fields = ["id", "date_created", "date_updated", "support_contact", "event_status" ]

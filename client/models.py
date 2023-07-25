@@ -19,5 +19,5 @@ class CustomClient(models.Model):
     )
     is_prospect = models.BooleanField(blank=True, default=True)
     
-    def __str__(self) -> str:
+    def __str__(self):
         return self.company_name

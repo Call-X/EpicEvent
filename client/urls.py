@@ -9,5 +9,5 @@ create_client = ClientView.as_view({
 
 urlpatterns = ([
     path('create_client/', create_client, name='create_client'),
-    path('details_client/<int:pk>/', ClientDetailView.as_view()),
+    path('details_client/<int:id>/', ClientDetailView.as_view()),
  ])
